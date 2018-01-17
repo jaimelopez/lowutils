@@ -7,12 +7,14 @@ import (
 	"strings"
 )
 
-const H_START_NOTATION_NUM string = "0x"
-const H_START_NOTATION_SYM string = "\\x"
-const H_START_NOTATION_CHAR string = "x"
-const H_END_NOTATION string = "h"
+const (
+	hStartNotationNum  string = "0x"
+	hStartNotationSym  string = "\\x"
+	hStartNotationChar string = "x"
+	hEndNotation       string = "h"
 
-const CHARS_NUM int = 2
+	charsNum int = 2
+)
 
 func main() {
 	if len(os.Args) <= 1 {
@@ -42,7 +44,7 @@ func sanetize(input string) string {
 	result := ""
 
 	for input != "" {
-		if len(input) <= CHARS_NUM {
+		if len(input) <= charsNum {
 			result += input
 			input = ""
 
@@ -51,30 +53,30 @@ func sanetize(input string) string {
 
 		prefix := ""
 
-		if strings.HasPrefix(input, H_START_NOTATION_NUM) {
-			prefix = H_START_NOTATION_NUM
-		} else if strings.HasPrefix(input, H_START_NOTATION_SYM) {
-			prefix = H_START_NOTATION_SYM
-		} else if strings.HasPrefix(input, H_START_NOTATION_CHAR) {
-			prefix = H_START_NOTATION_CHAR
+		if strings.HasPrefix(input, hStartNotationNum) {
+			prefix = hStartNotationNum
+		} else if strings.HasPrefix(input, hStartNotationSym) {
+			prefix = hStartNotationSym
+		} else if strings.HasPrefix(input, hStartNotationChar) {
+			prefix = hStartNotationChar
 		}
 
 		if prefix != "" {
-			result += input[len(prefix) : len(prefix)+CHARS_NUM]
-			input = input[len(prefix)+CHARS_NUM:]
+			result += input[len(prefix) : len(prefix)+charsNum]
+			input = input[len(prefix)+charsNum:]
 
 			continue
 		}
 
-		if input[CHARS_NUM:CHARS_NUM+len(H_END_NOTATION)] == H_END_NOTATION {
-			result += input[:CHARS_NUM]
-			input = input[CHARS_NUM+len(H_END_NOTATION):]
+		if input[charsNum:charsNum+len(hEndNotation)] == hEndNotation {
+			result += input[:charsNum]
+			input = input[charsNum+len(hEndNotation):]
 
 			continue
 		}
 
-		result += input[:CHARS_NUM]
-		input = input[CHARS_NUM:]
+		result += input[:charsNum]
+		input = input[charsNum:]
 	}
 
 	return result
