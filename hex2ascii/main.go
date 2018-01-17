@@ -12,6 +12,8 @@ const H_START_NOTATION_SYM string = "\\x"
 const H_START_NOTATION_CHAR string = "x"
 const H_END_NOTATION string = "h"
 
+const CHARS_NUM int = 2
+
 func main() {
 	if len(os.Args) <= 1 {
 		fmt.Println("USAGE: missing hexadecimal")
@@ -21,12 +23,12 @@ func main() {
 	var results []string
 
 	for _, value := range os.Args[1:] {
-		var input string = sanetize(value)
+		chunk := sanetize(value)
 
-		bs, err := hex.DecodeString(input)
+		bs, err := hex.DecodeString(chunk)
 
 		if err != nil {
-			results = append(results, fmt.Sprintf("<Err:%s>", input))
+			results = append(results, fmt.Sprintf("<Err:%s>", chunk))
 			continue
 		}
 
@@ -37,21 +39,43 @@ func main() {
 }
 
 func sanetize(input string) string {
-	if strings.HasPrefix(input, H_START_NOTATION_NUM) {
-		return input[len(H_START_NOTATION_NUM):]
+	result := ""
+
+	for input != "" {
+		if len(input) <= CHARS_NUM {
+			result += input
+			input = ""
+
+			continue
+		}
+
+		prefix := ""
+
+		if strings.HasPrefix(input, H_START_NOTATION_NUM) {
+			prefix = H_START_NOTATION_NUM
+		} else if strings.HasPrefix(input, H_START_NOTATION_SYM) {
+			prefix = H_START_NOTATION_SYM
+		} else if strings.HasPrefix(input, H_START_NOTATION_CHAR) {
+			prefix = H_START_NOTATION_CHAR
+		}
+
+		if prefix != "" {
+			result += input[len(prefix) : len(prefix)+CHARS_NUM]
+			input = input[len(prefix)+CHARS_NUM:]
+
+			continue
+		}
+
+		if input[CHARS_NUM:CHARS_NUM+len(H_END_NOTATION)] == H_END_NOTATION {
+			result += input[:CHARS_NUM]
+			input = input[CHARS_NUM+len(H_END_NOTATION):]
+
+			continue
+		}
+
+		result += input[:CHARS_NUM]
+		input = input[CHARS_NUM:]
 	}
 
-	if strings.HasPrefix(input, H_START_NOTATION_SYM) {
-		return input[len(H_START_NOTATION_SYM):]
-	}
-
-	if strings.HasPrefix(input, H_START_NOTATION_CHAR) {
-		return input[len(H_START_NOTATION_CHAR):]
-	}
-
-	if strings.HasSuffix(input, H_END_NOTATION) {
-		return input[:len(input)-len(H_END_NOTATION)]
-	}
-
-	return input
+	return result
 }
